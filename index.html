@@ -1,0 +1,283 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>VizForm Studio</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <aside class="sidebar" aria-label="visualization controls">
+        <div class="brand-block">
+          <p class="eyebrow">VizForm Studio</p>
+          <h1>上传数据，直接生成可视化表单</h1>
+          <p>支持 Excel 解析和截图预览，选择 ECharts 表达方式与样式后即时输出。</p>
+        </div>
+
+        <section class="control-group">
+          <div class="group-head">
+            <span>01</span>
+            <h2>输入</h2>
+          </div>
+          <label class="upload-zone" for="fileInput">
+            <input id="fileInput" type="file" accept=".xlsx,.xls,.csv,image/*" />
+            <span class="upload-icon" aria-hidden="true">+</span>
+            <strong>上传 Excel / CSV / 截图</strong>
+            <small id="fileMeta">也可以先使用示例数据</small>
+          </label>
+          <div class="button-row">
+            <button class="secondary" id="sampleSales" type="button">销售数据</button>
+            <button class="secondary" id="sampleOps" type="button">运营指标</button>
+            <button class="secondary" id="sampleEcom" type="button">电商指标</button>
+          </div>
+        </section>
+
+        <section class="control-group">
+          <div class="group-head">
+            <span>02</span>
+            <h2>电商指标库</h2>
+          </div>
+          <div class="metric-library" id="metricLibrary">
+            <div>
+              <p>经营结果</p>
+              <button class="metric-chip is-active" data-metric="GMV" type="button">GMV</button>
+              <button class="metric-chip" data-metric="订单量" type="button">订单量</button>
+              <button class="metric-chip" data-metric="客单价" type="button">客单价</button>
+              <button class="metric-chip" data-metric="毛利率" type="button">毛利率</button>
+            </div>
+            <div>
+              <p>流量转化</p>
+              <button class="metric-chip" data-metric="UV" type="button">UV</button>
+              <button class="metric-chip" data-metric="PV" type="button">PV</button>
+              <button class="metric-chip" data-metric="支付转化率" type="button">支付转化率</button>
+              <button class="metric-chip" data-metric="点击率" type="button">点击率</button>
+            </div>
+            <div>
+              <p>订单履约</p>
+              <button class="metric-chip" data-metric="退款率" type="button">退款率</button>
+              <button class="metric-chip" data-metric="发货时长" type="button">发货时长</button>
+              <button class="metric-chip" data-metric="履约率" type="button">履约率</button>
+            </div>
+            <div>
+              <p>商品和用户</p>
+              <button class="metric-chip" data-metric="售罄率" type="button">售罄率</button>
+              <button class="metric-chip" data-metric="库存周转" type="button">库存周转</button>
+              <button class="metric-chip" data-metric="复购率" type="button">复购率</button>
+              <button class="metric-chip" data-metric="留存率" type="button">留存率</button>
+            </div>
+          </div>
+        </section>
+
+        <section class="control-group">
+          <div class="group-head">
+            <span>03</span>
+            <h2>表达形式</h2>
+          </div>
+          <div class="template-grid" role="listbox" aria-label="ECharts templates">
+            <button class="template-card is-active" data-template="bar" type="button">
+              <span class="mini-chart bars"><i></i><i></i><i></i></span>
+              <strong>基础柱状</strong>
+              <small>类目对比</small>
+            </button>
+            <button class="template-card" data-template="stacked-bar" type="button">
+              <span class="mini-chart stacked"><i></i><i></i><i></i></span>
+              <strong>堆叠柱状</strong>
+              <small>分组构成</small>
+            </button>
+            <button class="template-card" data-template="line" type="button">
+              <span class="mini-chart line"><i></i></span>
+              <strong>平滑折线</strong>
+              <small>趋势变化</small>
+            </button>
+            <button class="template-card" data-template="area-line" type="button">
+              <span class="mini-chart area"><i></i></span>
+              <strong>面积折线</strong>
+              <small>趋势体量</small>
+            </button>
+            <button class="template-card" data-template="pie" type="button">
+              <span class="mini-chart pie"></span>
+              <strong>环形饼图</strong>
+              <small>占比结构</small>
+            </button>
+            <button class="template-card" data-template="rose" type="button">
+              <span class="mini-chart rose"></span>
+              <strong>南丁格尔</strong>
+              <small>占比强调</small>
+            </button>
+            <button class="template-card" data-template="scatter" type="button">
+              <span class="mini-chart scatter"><i></i><i></i><i></i><i></i></span>
+              <strong>散点分布</strong>
+              <small>关系分布</small>
+            </button>
+            <button class="template-card" data-template="effectScatter" type="button">
+              <span class="mini-chart scatter"><i></i><i></i><i></i><i></i></span>
+              <strong>涟漪散点</strong>
+              <small>重点标记</small>
+            </button>
+            <button class="template-card" data-template="radar" type="button">
+              <span class="mini-chart radar-icon"></span>
+              <strong>雷达图</strong>
+              <small>多指标画像</small>
+            </button>
+            <button class="template-card" data-template="heatmap" type="button">
+              <span class="mini-chart heatmap-icon"><i></i><i></i><i></i><i></i></span>
+              <strong>热力图</strong>
+              <small>二维密度</small>
+            </button>
+            <button class="template-card" data-template="funnel" type="button">
+              <span class="mini-chart funnel-icon"><i></i><i></i><i></i></span>
+              <strong>漏斗图</strong>
+              <small>转化路径</small>
+            </button>
+            <button class="template-card" data-template="gauge" type="button">
+              <span class="mini-chart gauge-icon"></span>
+              <strong>仪表盘</strong>
+              <small>单指标状态</small>
+            </button>
+            <button class="template-card" data-template="treemap" type="button">
+              <span class="mini-chart treemap-icon"><i></i><i></i><i></i></span>
+              <strong>矩形树图</strong>
+              <small>层级占比</small>
+            </button>
+            <button class="template-card" data-template="sunburst" type="button">
+              <span class="mini-chart sunburst-icon"></span>
+              <strong>旭日图</strong>
+              <small>层级结构</small>
+            </button>
+            <button class="template-card" data-template="boxplot" type="button">
+              <span class="mini-chart boxplot-icon"><i></i></span>
+              <strong>箱线图</strong>
+              <small>分布离散</small>
+            </button>
+            <button class="template-card" data-template="candlestick" type="button">
+              <span class="mini-chart candle-icon"><i></i><i></i><i></i></span>
+              <strong>K 线图</strong>
+              <small>区间波动</small>
+            </button>
+            <button class="template-card" data-template="graph" type="button">
+              <span class="mini-chart graph-icon"><i></i><i></i><i></i></span>
+              <strong>关系图</strong>
+              <small>节点关系</small>
+            </button>
+            <button class="template-card" data-template="sankey" type="button">
+              <span class="mini-chart sankey-icon"><i></i><i></i><i></i></span>
+              <strong>桑基图</strong>
+              <small>流向分配</small>
+            </button>
+            <button class="template-card" data-template="parallel" type="button">
+              <span class="mini-chart parallel-icon"><i></i><i></i><i></i></span>
+              <strong>平行坐标</strong>
+              <small>多变量比较</small>
+            </button>
+            <button class="template-card" data-template="lines" type="button">
+              <span class="mini-chart line"><i></i></span>
+              <strong>路径线图</strong>
+              <small>流向轨迹</small>
+            </button>
+            <button class="template-card" data-template="map" type="button">
+              <span class="mini-chart map-icon"></span>
+              <strong>地图占位</strong>
+              <small>需地图数据</small>
+            </button>
+            <button class="template-card" data-template="custom" type="button">
+              <span class="mini-chart custom-icon"><i></i><i></i><i></i></span>
+              <strong>自定义系列</strong>
+              <small>custom series</small>
+            </button>
+            <button class="template-card" data-template="table" type="button">
+              <span class="mini-chart table-icon"><i></i><i></i><i></i></span>
+              <strong>数据表格</strong>
+              <small>ECharts graphic</small>
+            </button>
+          </div>
+          <label class="select-field">
+            <span>X 轴 / 类目</span>
+            <select id="xField"></select>
+          </label>
+          <label class="select-field">
+            <span>Y 轴 / 数值</span>
+            <select id="yField"></select>
+          </label>
+          <label class="select-field">
+            <span>系列 / 分组</span>
+            <select id="seriesField"></select>
+          </label>
+        </section>
+
+        <section class="control-group">
+          <div class="group-head">
+            <span>04</span>
+            <h2>ECharts 样式</h2>
+          </div>
+          <label class="select-field">
+            <span>主题</span>
+            <select id="themeSelect">
+              <option value="executive">Executive</option>
+              <option value="fresh">Fresh</option>
+              <option value="mono">Mono</option>
+              <option value="contrast">Contrast</option>
+            </select>
+          </label>
+          <div class="toggle-grid">
+            <label class="check-row"><input id="smoothLine" type="checkbox" checked /> 平滑曲线</label>
+            <label class="check-row"><input id="showArea" type="checkbox" /> 面积填充</label>
+            <label class="check-row"><input id="showLegend" type="checkbox" checked /> 图例</label>
+            <label class="check-row"><input id="showGrid" type="checkbox" checked /> 网格线</label>
+          </div>
+        </section>
+      </aside>
+
+      <section class="workspace">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">Output</p>
+            <h2 id="datasetTitle">可视化表单</h2>
+          </div>
+          <div class="top-actions">
+            <button class="secondary icon-button" id="downloadPng" type="button" title="导出 PNG">PNG</button>
+            <button class="primary" id="copyOption" type="button">复制 ECharts Option</button>
+          </div>
+        </header>
+
+        <section class="result-band">
+          <div class="kpi-strip" id="kpiStrip" aria-label="ecommerce metric summary"></div>
+          <div class="chart-stage">
+            <div id="chart" aria-label="echarts chart"></div>
+          </div>
+          <div class="inspector">
+            <p class="panel-label">当前配置</p>
+            <dl>
+              <div><dt>数据源</dt><dd id="sourceLabel">示例销售数据</dd></div>
+              <div><dt>图表</dt><dd id="chartLabel">柱状图</dd></div>
+              <div><dt>字段</dt><dd id="fieldLabel">月份 / 销售额</dd></div>
+            </dl>
+            <div class="preview-frame" id="imagePreviewWrap" hidden>
+              <p>截图预览</p>
+              <img id="imagePreview" alt="uploaded screenshot preview" />
+            </div>
+          </div>
+        </section>
+
+        <section class="data-editor">
+          <div class="section-head">
+            <div>
+              <p class="eyebrow">Editable Data</p>
+              <h2>数据表</h2>
+            </div>
+            <button class="secondary" id="addRow" type="button">新增行</button>
+          </div>
+          <div class="table-wrap">
+            <table id="dataTable"></table>
+          </div>
+        </section>
+      </section>
+    </main>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.1/dist/echarts.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script src="./script.js"></script>
+  </body>
+</html>
