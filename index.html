@@ -26,6 +26,12 @@
             <strong>上传 Excel / CSV / 截图</strong>
             <small id="fileMeta">也可以先使用示例数据</small>
           </label>
+          <label class="upload-zone mockup-upload" for="mockupInput">
+            <input id="mockupInput" type="file" accept="image/*" />
+            <span class="upload-icon" aria-hidden="true">□</span>
+            <strong>上传高保真页面</strong>
+            <small id="mockupMeta">页面会常驻在右侧无限画布中</small>
+          </label>
           <div class="button-row">
             <button class="secondary" id="sampleSales" type="button">销售数据</button>
             <button class="secondary" id="sampleOps" type="button">运营指标</button>
@@ -235,26 +241,64 @@
             <h2 id="datasetTitle">可视化表单</h2>
           </div>
           <div class="top-actions">
+            <button class="secondary icon-button" id="zoomOut" type="button" title="缩小">−</button>
+            <button class="secondary icon-button" id="zoomReset" type="button" title="复位画布">100%</button>
+            <button class="secondary icon-button" id="zoomIn" type="button" title="放大">+</button>
             <button class="secondary icon-button" id="downloadPng" type="button" title="导出 PNG">PNG</button>
             <button class="primary" id="copyOption" type="button">复制 ECharts Option</button>
           </div>
         </header>
 
         <section class="result-band">
-          <div class="kpi-strip" id="kpiStrip" aria-label="ecommerce metric summary"></div>
-          <div class="chart-stage">
-            <div id="chart" aria-label="echarts chart"></div>
+          <div class="canvas-toolbar" aria-label="canvas status">
+            <span id="canvasStatus">拖拽画布查看页面与指标，滚轮缩放</span>
+            <span id="zoomLabel">100%</span>
           </div>
-          <div class="inspector">
-            <p class="panel-label">当前配置</p>
-            <dl>
-              <div><dt>数据源</dt><dd id="sourceLabel">示例销售数据</dd></div>
-              <div><dt>图表</dt><dd id="chartLabel">柱状图</dd></div>
-              <div><dt>字段</dt><dd id="fieldLabel">月份 / 销售额</dd></div>
-            </dl>
-            <div class="preview-frame" id="imagePreviewWrap" hidden>
-              <p>截图预览</p>
-              <img id="imagePreview" alt="uploaded screenshot preview" />
+          <div class="canvas-viewport" id="canvasViewport" tabindex="0" aria-label="infinite canvas workspace">
+            <div class="canvas-world" id="canvasWorld">
+              <article class="mockup-node canvas-node">
+                <div class="node-head">
+                  <span>高保真页面</span>
+                  <small id="mockupNodeLabel">未上传</small>
+                </div>
+                <div class="mockup-stage" id="mockupStage">
+                  <img id="mockupPreview" alt="uploaded high fidelity page" hidden />
+                  <div class="mockup-placeholder" id="mockupPlaceholder">
+                    <strong>上传页面后会固定在这里</strong>
+                    <span>支持 PNG / JPG / WebP 截图，用来和右侧指标保持同屏对照。</span>
+                  </div>
+                </div>
+              </article>
+
+              <article class="metrics-node canvas-node">
+                <div class="node-head">
+                  <span>指标快照</span>
+                  <small id="sourceLabel">电商核心指标</small>
+                </div>
+                <div class="kpi-strip" id="kpiStrip" aria-label="ecommerce metric summary"></div>
+              </article>
+
+              <article class="chart-node canvas-node">
+                <div class="node-head">
+                  <span id="canvasDatasetTitle">可视化表单</span>
+                  <small id="chartLabel">柱状图</small>
+                </div>
+                <div class="chart-stage">
+                  <div id="chart" aria-label="echarts chart"></div>
+                </div>
+              </article>
+
+              <article class="inspector canvas-node">
+                <p class="panel-label">当前配置</p>
+                <dl>
+                  <div><dt>字段</dt><dd id="fieldLabel">月份 / 销售额</dd></div>
+                  <div><dt>画布</dt><dd id="canvasModeLabel">高保真页面 + 指标常驻</dd></div>
+                </dl>
+                <div class="preview-frame" id="imagePreviewWrap" hidden>
+                  <p>截图数据草稿</p>
+                  <img id="imagePreview" alt="uploaded screenshot preview" />
+                </div>
+              </article>
             </div>
           </div>
         </section>

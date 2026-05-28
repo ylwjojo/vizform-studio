@@ -92,6 +92,18 @@ const els = {
   table: document.getElementById("dataTable"),
   fileInput: document.getElementById("fileInput"),
   fileMeta: document.getElementById("fileMeta"),
+  mockupInput: document.getElementById("mockupInput"),
+  mockupMeta: document.getElementById("mockupMeta"),
+  mockupPreview: document.getElementById("mockupPreview"),
+  mockupPlaceholder: document.getElementById("mockupPlaceholder"),
+  mockupNodeLabel: document.getElementById("mockupNodeLabel"),
+  canvasViewport: document.getElementById("canvasViewport"),
+  canvasWorld: document.getElementById("canvasWorld"),
+  canvasStatus: document.getElementById("canvasStatus"),
+  zoomLabel: document.getElementById("zoomLabel"),
+  zoomIn: document.getElementById("zoomIn"),
+  zoomOut: document.getElementById("zoomOut"),
+  zoomReset: document.getElementById("zoomReset"),
   xField: document.getElementById("xField"),
   yField: document.getElementById("yField"),
   seriesField: document.getElementById("seriesField"),
@@ -103,12 +115,24 @@ const els = {
   showLegend: document.getElementById("showLegend"),
   showGrid: document.getElementById("showGrid"),
   datasetTitle: document.getElementById("datasetTitle"),
+  canvasDatasetTitle: document.getElementById("canvasDatasetTitle"),
   sourceLabel: document.getElementById("sourceLabel"),
   chartLabel: document.getElementById("chartLabel"),
   fieldLabel: document.getElementById("fieldLabel"),
   imagePreviewWrap: document.getElementById("imagePreviewWrap"),
   imagePreview: document.getElementById("imagePreview"),
   toast: document.getElementById("toast"),
+};
+
+const canvasState = {
+  x: 28,
+  y: 8,
+  scale: 0.86,
+  isPanning: false,
+  startX: 0,
+  startY: 0,
+  originX: 0,
+  originY: 0,
 };
 
 const showToast = (message) => {
@@ -118,7 +142,83 @@ const showToast = (message) => {
   showToast.timer = window.setTimeout(() => els.toast.classList.remove("is-visible"), 2200);
 };
 
+const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
+
+const applyCanvasTransform = () => {
+  canvasState.scale = clamp(canvasState.scale, 0.35, 1.8);
+  els.canvasWorld.style.transform = `translate(${canvasState.x}px, ${canvasState.y}px) scale(${canvasState.scale})`;
+  els.zoomLabel.textContent = `${Math.round(canvasState.scale * 100)}%`;
+  els.zoomReset.textContent = `${Math.round(canvasState.scale * 100)}%`;
+};
+
+const zoomCanvas = (nextScale, anchorX = els.canvasViewport.clientWidth / 2, anchorY = els.canvasViewport.clientHeight / 2) => {
+  const scale = clamp(nextScale, 0.35, 1.8);
+  const worldX = (anchorX - canvasState.x) / canvasState.scale;
+  const worldY = (anchorY - canvasState.y) / canvasState.scale;
+  canvasState.x = anchorX - worldX * scale;
+  canvasState.y = anchorY - worldY * scale;
+  canvasState.scale = scale;
+  applyCanvasTransform();
+};
+
+const resetCanvas = () => {
+  canvasState.x = 20;
+  canvasState.y = 8;
+  canvasState.scale = window.matchMedia("(max-width: 980px)").matches ? 0.48 : 0.72;
+  applyCanvasTransform();
+};
+
+const initCanvas = () => {
+  resetCanvas();
+
+  els.canvasViewport.addEventListener("pointerdown", (event) => {
+    if (event.target.closest("button, input, select, textarea, a")) return;
+    canvasState.isPanning = true;
+    canvasState.startX = event.clientX;
+    canvasState.startY = event.clientY;
+    canvasState.originX = canvasState.x;
+    canvasState.originY = canvasState.y;
+    els.canvasViewport.classList.add("is-panning");
+    els.canvasViewport.setPointerCapture(event.pointerId);
+  });
+
+  els.canvasViewport.addEventListener("pointermove", (event) => {
+    if (!canvasState.isPanning) return;
+    canvasState.x = canvasState.originX + event.clientX - canvasState.startX;
+    canvasState.y = canvasState.originY + event.clientY - canvasState.startY;
+    applyCanvasTransform();
+  });
+
+  const stopPanning = (event) => {
+    if (!canvasState.isPanning) return;
+    canvasState.isPanning = false;
+    els.canvasViewport.classList.remove("is-panning");
+    if (els.canvasViewport.hasPointerCapture(event.pointerId)) {
+      els.canvasViewport.releasePointerCapture(event.pointerId);
+    }
+  };
+
+  els.canvasViewport.addEventListener("pointerup", stopPanning);
+  els.canvasViewport.addEventListener("pointercancel", stopPanning);
+
+  els.canvasViewport.addEventListener("wheel", (event) => {
+    event.preventDefault();
+    const rect = els.canvasViewport.getBoundingClientRect();
+    const direction = event.deltaY > 0 ? -1 : 1;
+    zoomCanvas(canvasState.scale + direction * 0.08, event.clientX - rect.left, event.clientY - rect.top);
+  }, { passive: false });
+
+  els.zoomIn.addEventListener("click", () => zoomCanvas(canvasState.scale + 0.12));
+  els.zoomOut.addEventListener("click", () => zoomCanvas(canvasState.scale - 0.12));
+  els.zoomReset.addEventListener("click", resetCanvas);
+};
+
 const fields = () => (rows[0] ? Object.keys(rows[0]) : []);
+
+const updateDatasetTitle = () => {
+  els.datasetTitle.textContent = datasetTitle;
+  els.canvasDatasetTitle.textContent = datasetTitle;
+};
 
 const isNumericField = (field) => rows.some((row) => Number.isFinite(Number(row[field])));
 
@@ -204,7 +304,8 @@ const fillSelectors = () => {
 const renderKpis = () => {
   const priority = ["GMV", "订单量", "支付转化率", "客单价", "UV", "退款率", "售罄率", "复购率"];
   const available = priority.filter((metric) => fields().includes(metric));
-  const metrics = (available.length ? available : fields().filter(isNumericField)).slice(0, 4);
+  const fallback = fields().filter((field) => isNumericField(field) && !available.includes(field));
+  const metrics = [...available, ...fallback].slice(0, 4);
   els.kpiStrip.innerHTML = "";
 
   metrics.forEach((metric) => {
@@ -609,7 +710,7 @@ const renderChart = () => {
   if (isGraphicTable) {
     latestOption = buildGraphicTableOption(palette);
     chart.setOption(latestOption, true);
-    els.datasetTitle.textContent = datasetTitle;
+    updateDatasetTitle();
     els.sourceLabel.textContent = sourceLabel;
     els.chartLabel.textContent = chartNames[chartType];
     els.fieldLabel.textContent = fields().slice(0, 5).join(" / ");
@@ -621,7 +722,7 @@ const renderChart = () => {
   if (specialOption) {
     latestOption = specialOption;
     chart.setOption(latestOption, true);
-    els.datasetTitle.textContent = datasetTitle;
+    updateDatasetTitle();
     els.sourceLabel.textContent = sourceLabel;
     els.chartLabel.textContent = chartNames[chartType];
     els.fieldLabel.textContent = chartType === "map" ? "map / GeoJSON" : `${els.xField.value} / ${els.yField.value}${els.seriesField.value ? ` / ${els.seriesField.value}` : ""}`;
@@ -664,7 +765,7 @@ const renderChart = () => {
   };
 
   chart.setOption(latestOption, true);
-  els.datasetTitle.textContent = datasetTitle;
+  updateDatasetTitle();
   els.sourceLabel.textContent = sourceLabel;
   els.chartLabel.textContent = chartNames[chartType];
   els.fieldLabel.textContent = `${els.xField.value} / ${els.yField.value}${els.seriesField.value ? ` / ${els.seriesField.value}` : ""}`;
@@ -746,6 +847,23 @@ els.fileInput.addEventListener("change", async (event) => {
   }
 });
 
+els.mockupInput.addEventListener("change", (event) => {
+  const file = event.target.files?.[0];
+  if (!file) return;
+  if (!file.type.startsWith("image/")) {
+    showToast("请上传 PNG / JPG / WebP 格式的高保真页面截图。");
+    return;
+  }
+
+  els.mockupPreview.src = URL.createObjectURL(file);
+  els.mockupPreview.hidden = false;
+  els.mockupPlaceholder.hidden = true;
+  els.mockupMeta.textContent = file.name;
+  els.mockupNodeLabel.textContent = file.name;
+  els.canvasStatus.textContent = "高保真页面已常驻，可拖拽画布对照指标。";
+  showToast("高保真页面已放入无限画布。");
+});
+
 document.querySelectorAll("[data-template]").forEach((button) => {
   button.addEventListener("click", () => {
     document.querySelectorAll("[data-template]").forEach((item) => item.classList.remove("is-active"));
@@ -814,7 +932,11 @@ document.getElementById("downloadPng").addEventListener("click", () => {
   link.click();
 });
 
-window.addEventListener("resize", () => chart?.resize());
+window.addEventListener("resize", () => {
+  chart?.resize();
+  applyCanvasTransform();
+});
 
 chart = echarts.init(els.chart);
+initCanvas();
 loadRows(samples.ecommerce.rows, samples.ecommerce.title, "电商核心指标");
